@@ -1,3 +1,3 @@
-module github.com/YOUR-USER-OR-ORG-NAME/YOUR-REPO-NAME
+module github.com/azka1415/crud-bootcamp-evermos
 
 go 1.19
