@@ -45,5 +45,5 @@ func HandleGetMaterial(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responses.GetAllMaterialResponse(w, m, limit, page)
-
+	handleLogger.Info("Get All Materials Success")
 }
