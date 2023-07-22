@@ -21,6 +21,8 @@ func (m *MaterialRepository) GetAll(field, sort string, limit, offset int) (*sql
 	return rows, err
 }
 
-func (m *MaterialRepository) GetByID(id int) (*sql.Row, error) {
-	return nil, nil
+func (m *MaterialRepository) GetByID(id int) *sql.Row {
+	query := fmt.Sprintf("SELECT * FROM materials WHERE id = %d", id)
+	row := m.db.QueryRow(query)
+	return row
 }
