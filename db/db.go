@@ -7,7 +7,6 @@ import (
 )
 
 func GetDB() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", "./test.db")
-
+	db, err := sql.Open("sqlite3", "db/test.db")
 	return db, err
 }
