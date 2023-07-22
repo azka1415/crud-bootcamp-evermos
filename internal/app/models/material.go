@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/azka1415/crud-bootcamp-evermos/db"
+	"github.com/azka1415/crud-bootcamp-evermos/internal/app/repository"
 )
 
 type Material struct {
@@ -16,20 +17,34 @@ type Material struct {
 
 type MaterialService struct{}
 
-func (m *MaterialService) GetAll(limit, offset int) ([]Material, error) {
-	db, dbErr := db.GetDB()
+func (m *MaterialService) GetAll(limit, page int, sort, field string) ([]Material, error) {
+	db, err := db.GetDB()
+
+	offset := (page - 1) * limit
+
 	var materials []Material
-	if dbErr != nil {
-		return nil, dbErr
-	}
-	rows, err := db.Query("SELECT * FROM materials")
+
 	if err != nil {
 		return nil, err
 	}
+
+	materialRepository := repository.MaterialRepository{}
+	materialRepository.SetDB(db)
+
+	rows, err := materialRepository.GetAll(field, sort, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
 	for rows.Next() {
 		var material Material
 		rows.Scan(&material.Id, &material.Title, &material.Teacher, &material.CreatedAt, &material.UpdatedAt)
 		materials = append(materials, material)
 	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return materials, nil
 }
