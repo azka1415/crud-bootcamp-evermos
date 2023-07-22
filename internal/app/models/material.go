@@ -1,9 +1,7 @@
 package models
 
 import (
-	"database/sql"
 	"errors"
-	"reflect"
 	"time"
 
 	"github.com/azka1415/crud-bootcamp-evermos/db"
@@ -16,6 +14,11 @@ type Material struct {
 	Teacher   int       `json:"teacher"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+type UpdateMaterial struct {
+	Title   string `json:"title"`
+	Teacher string `json:"teacher"`
 }
 
 type MaterialService struct{}
@@ -62,18 +65,26 @@ func (m *MaterialService) GetByID(matID int) (Material, error) {
 	materialRepository := repository.MaterialRepository{}
 	materialRepository.SetDB(db)
 	row := materialRepository.GetByID(matID)
-	err = row.Scan(&material.Id, &material.Title, &material.Teacher, &material.CreatedAt, &material.UpdatedAt)
-
-	if reflect.DeepEqual(material, Material{}) {
-		return material, errors.New("Material not found")
-	}
-
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return material, errors.New("material not found")
-		}
-		return material, err
-	}
+	row.Scan(&material.Id, &material.Title, &material.Teacher, &material.CreatedAt, &material.UpdatedAt)
 
 	return material, nil
+}
+
+func (m *MaterialService) Update(matID int) (Material, error) {
+	return Material{}, nil
+}
+
+func (m *MaterialService) MaterialExistsByID(id int) (bool, error) {
+	db, err := db.GetDB()
+	if err != nil {
+		return false, err
+	}
+	materialRepo := repository.MaterialRepository{}
+	materialRepo.SetDB(db)
+	valid, err := materialRepo.MaterialExistsByID(id)
+
+	if err != nil {
+		return valid, errors.New("Material not found")
+	}
+	return valid, nil
 }

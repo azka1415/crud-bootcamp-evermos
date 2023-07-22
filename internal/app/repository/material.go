@@ -26,3 +26,23 @@ func (m *MaterialRepository) GetByID(id int) *sql.Row {
 	row := m.db.QueryRow(query)
 	return row
 }
+
+func (m *MaterialRepository) UpdateByID(id int) (*sql.Row, error) {
+	return nil, nil
+}
+
+func (m *MaterialRepository) MaterialExistsByID(id int) (bool, error) {
+	query := fmt.Sprintf("SELECT * FROM materials WHERE id = %d", id)
+	var count int
+	err := m.db.QueryRow(query).Scan(&count)
+
+	if err != nil {
+		return false, err
+	}
+
+	if count > 0 {
+		return true, nil
+	}
+
+	return false, nil
+}
