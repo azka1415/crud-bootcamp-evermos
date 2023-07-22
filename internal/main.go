@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/azka1415/crud-bootcamp-evermos/db"
-	"github.com/azka1415/crud-bootcamp-evermos/internal/app/handlers"
 	"github.com/azka1415/crud-bootcamp-evermos/internal/app/middleware"
+	"github.com/azka1415/crud-bootcamp-evermos/internal/app/routes"
 	"github.com/go-chi/chi"
 	log "github.com/sirupsen/logrus"
 )
@@ -19,10 +19,7 @@ func API() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.JsonMiddleware)
-	r.Get("/materials", handlers.HandleGetMaterial)
-	r.Post("/materials", handlers.HandlePostMaterial)
-	r.Put("/materials", handlers.HandleUpdateMaterial)
-	r.Delete("/materials", handlers.HandleDeleteMaterial)
+	routes.SetMaterialRoutes(r)
 	apiLogger.Info("Connected to database")
 	defer db.Close()
 	apiLogger.Info("Server starting on port 8080")
