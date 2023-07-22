@@ -22,6 +22,21 @@ func HandleGetMaterialByID(w http.ResponseWriter, r *http.Request) {
 
 	handleLogger := log.WithFields(log.Fields{"get": fmt.Sprintf("/materials/%v", materialID)})
 	materialService := models.MaterialService{}
+
+	exists, err := materialService.MaterialExistsByID(materialID)
+
+	if err != nil {
+		exceptions.NotFoundException(w, err)
+		handleLogger.Error(err)
+		return
+	}
+
+	if !exists {
+		exceptions.NotFoundException(w, err)
+		handleLogger.Error(err)
+		return
+	}
+
 	m, err := materialService.GetByID(materialID)
 
 	if err != nil {
