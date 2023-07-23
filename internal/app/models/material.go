@@ -23,8 +23,8 @@ type UpdateMaterial struct {
 
 type MaterialService struct{}
 
-func NewMaterialService() MaterialService {
-	return MaterialService{}
+func NewMaterialService() *MaterialService {
+	return &MaterialService{}
 }
 
 func (m *MaterialService) GetAll(limit, page int, sort, field string) ([]Material, error) {

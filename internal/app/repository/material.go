@@ -10,10 +10,10 @@ type MaterialRepository struct {
 	db *sql.DB
 }
 
-func NewMaterialRepository(db *sql.DB) MaterialRepository {
+func NewMaterialRepository(db *sql.DB) *MaterialRepository {
 	mr := MaterialRepository{}
 	mr.SetDB(db)
-	return mr
+	return &mr
 }
 
 func (m *MaterialRepository) SetDB(db *sql.DB) {
