@@ -23,6 +23,10 @@ type UpdateMaterial struct {
 
 type MaterialService struct{}
 
+func NewMaterialService() MaterialService {
+	return MaterialService{}
+}
+
 func (m *MaterialService) GetAll(limit, page int, sort, field string) ([]Material, error) {
 	db, err := db.GetDB()
 
@@ -34,8 +38,7 @@ func (m *MaterialService) GetAll(limit, page int, sort, field string) ([]Materia
 		return nil, err
 	}
 
-	materialRepository := repository.MaterialRepository{}
-	materialRepository.SetDB(db)
+	materialRepository := repository.NewMaterialRepository(db)
 
 	rows, err := materialRepository.GetAll(field, sort, limit, offset)
 	if err != nil {
@@ -62,8 +65,7 @@ func (m *MaterialService) GetByID(matID int) (Material, error) {
 		return material, err
 	}
 
-	materialRepository := repository.MaterialRepository{}
-	materialRepository.SetDB(db)
+	materialRepository := repository.NewMaterialRepository(db)
 	row := materialRepository.GetByID(matID)
 	row.Scan(&material.Id, &material.Title, &material.Teacher, &material.CreatedAt, &material.UpdatedAt)
 
@@ -79,8 +81,7 @@ func (m *MaterialService) MaterialExistsByID(id int) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	materialRepo := repository.MaterialRepository{}
-	materialRepo.SetDB(db)
+	materialRepo := repository.NewMaterialRepository(db)
 	valid, err := materialRepo.MaterialExistsByID(id)
 
 	if err != nil {
