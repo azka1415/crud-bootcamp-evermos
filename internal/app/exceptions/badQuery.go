@@ -5,8 +5,8 @@ import (
 	"net/http"
 )
 
-func BadQueryException(w http.ResponseWriter) {
+func BadQueryException(w http.ResponseWriter, err error) {
 	w.WriteHeader(http.StatusBadRequest)
-	ex := Exception{Message: "Please check your query", Error: "Bad Request"}
+	ex := Exception{Message: err.Error(), Error: "Bad Request"}
 	json.NewEncoder(w).Encode(ex)
 }
