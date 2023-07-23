@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"time"
 )
 
 type MaterialRepository struct {
@@ -33,12 +34,33 @@ func (m *MaterialRepository) GetByID(id int) *sql.Row {
 	return row
 }
 
-func (m *MaterialRepository) UpdateByID(id int) (*sql.Row, error) {
-	return nil, nil
+func (m *MaterialRepository) UpdateByID(matID int, title string, teacher int) *sql.Row {
+	currentTime := time.Now()
+	query := `
+		UPDATE materials
+		SET title = ?,
+			updated_at = ?,
+			teacher_id = ?
+		WHERE id = ?
+		RETURNING *
+	`
+	row := m.db.QueryRow(query, title, currentTime.Local(), teacher, matID)
+	return row
 }
 
-func (m *MaterialRepository) MaterialExistsByID(id int) (bool, error) {
-	query := fmt.Sprintf("SELECT * FROM materials WHERE id = %d", id)
+func (m *MaterialRepository) NewMaterial(title string, teacher_id int) *sql.Row {
+	query := `
+		INSERT INTO materials (title, teacher_id )
+		VALUES (?, ?)
+		RETURNING *;
+	`
+
+	row := m.db.QueryRow(query, title, teacher_id)
+	return row
+}
+
+func (m *MaterialRepository) MaterialExistsByID(matID int) (bool, error) {
+	query := fmt.Sprintf("SELECT id FROM materials WHERE id = %d ", matID)
 	var count int
 	err := m.db.QueryRow(query).Scan(&count)
 
