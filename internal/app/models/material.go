@@ -90,15 +90,26 @@ func (m *MaterialService) UpdateMaterial(matID int, updatedMaterial UpdateMateri
 
 func (m *MaterialService) NewMaterial(newMat UpdateMaterial) (Material, error) {
 	db, err := db.GetDB()
-	if err != nil {
-		return Material{}, err
-	}
 
 	matRepo := repository.NewMaterialRepository(db)
 	var mat Material
 	row := matRepo.NewMaterial(newMat.Title, newMat.Teacher_id)
 	row.Scan(&mat.Id, &mat.Title, &mat.Teacher_id, &mat.CreatedAt, &mat.UpdatedAt)
 	return mat, err
+}
+
+func (m *MaterialService) DeleteMaterial(matID int) (bool, error) {
+	db, err := db.GetDB()
+	if err != nil {
+		return false, err
+	}
+	matRepo := repository.NewMaterialRepository(db)
+
+	err = matRepo.DeleteMaterial(matID)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func (m *MaterialService) MaterialExistsByID(id int) (bool, error) {

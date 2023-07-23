@@ -59,6 +59,11 @@ func (m *MaterialRepository) NewMaterial(title string, teacher_id int) *sql.Row 
 	return row
 }
 
+func (m *MaterialRepository) DeleteMaterial(matID int) error {
+	_, err := m.db.Exec("DELETE FROM materials WHERE id=?", matID)
+	return err
+}
+
 func (m *MaterialRepository) MaterialExistsByID(matID int) (bool, error) {
 	query := fmt.Sprintf("SELECT id FROM materials WHERE id = %d ", matID)
 	var count int
