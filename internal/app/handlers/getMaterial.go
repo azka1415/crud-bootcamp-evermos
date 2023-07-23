@@ -18,29 +18,30 @@ func HandleGetMaterial(w http.ResponseWriter, r *http.Request) {
 
 	page, err := utils.ConvertToInt(utils.ParseQueryParams(r, "page"))
 	if err != nil {
-		handleLogger.Error(errors.New("please check your query"))
-		exceptions.BadQueryException(w)
+		err = errors.New("invalid page query param")
+		handleLogger.Error(err)
+		exceptions.BadQueryException(w, err)
 		return
 	}
 
 	limit, err := utils.ConvertToInt(utils.ParseQueryParams(r, "limit"))
 	if err != nil {
-		handleLogger.Error(errors.New("please check your query"))
-		exceptions.BadQueryException(w)
+		err = errors.New("invalid limit query param")
+		handleLogger.Error(err)
+		exceptions.BadQueryException(w, err)
 		return
 	}
 
 	sort := sort.GetSortDirection(utils.ParseQueryParams(r, "sort"))
 	field := utils.ParseQueryParams(r, "field")
 
-	materialService := models.MaterialService{}
+	materialService := models.NewMaterialService()
 
 	m, err := materialService.GetAll(limit, page, sort, field)
 
 	if err != nil {
-		handleLogger.Info(err)
-		handleLogger.Error(errors.New("please check your query"))
-		exceptions.BadQueryException(w)
+		handleLogger.Error(err)
+		exceptions.BadQueryException(w, err)
 		return
 	}
 
