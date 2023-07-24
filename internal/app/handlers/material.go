@@ -195,6 +195,6 @@ func (h *MaterialHandler) UpdateMaterial(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	responses.UpdateMaterialResponse(w, mat)
-
+	responses.UpdateByIDResponse(w, mat)
+	handleLogger.Info("Updated Material success")
 }
