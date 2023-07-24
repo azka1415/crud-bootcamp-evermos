@@ -12,6 +12,7 @@ import (
 
 func API() {
 	apiLogger := log.WithFields(log.Fields{"Server": "Info"})
+
 	db, err := db.GetDB()
 	if err != nil {
 		apiLogger.Fatal("Error opening database:", err)
@@ -20,8 +21,10 @@ func API() {
 	r := chi.NewRouter()
 	r.Use(middleware.CorsMiddleware)
 	r.Use(middleware.JsonMiddleware)
-	routes.SetMaterialRoutes(r)
-	routes.SetTeacherRoutes(r)
+
+	routes.SetMaterialRoutes(r, db)
+	routes.SetTeacherRoutes(r, db)
+
 	apiLogger.Info("Connected to database")
 	defer db.Close()
 	apiLogger.Info("Server starting on port 8080")

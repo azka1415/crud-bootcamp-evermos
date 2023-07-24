@@ -15,10 +15,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type TeacherHandler struct{}
+type TeacherHandler struct {
+	service *models.TeacherService
+}
 
-func NewTeacherHandler() *TeacherHandler {
-	return &TeacherHandler{}
+func NewTeacherHandler(service *models.TeacherService) *TeacherHandler {
+	th := TeacherHandler{}
+	th.service = service
+	return &th
 }
 
 func (t *TeacherHandler) GetTeacher(w http.ResponseWriter, r *http.Request) {
@@ -44,9 +48,7 @@ func (t *TeacherHandler) GetTeacher(w http.ResponseWriter, r *http.Request) {
 	sort := sort.GetSortDirection(utils.ParseQueryParams(r, "sort"))
 	field := utils.ParseQueryParams(r, "field")
 
-	teaService := models.NewTeacherService()
-
-	m, err := teaService.GetAll(limit, page, sort, field)
+	m, err := t.service.GetAll(limit, page, sort, field)
 
 	if err != nil {
 		handleLogger.Error(err)
@@ -66,9 +68,8 @@ func (t *TeacherHandler) DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	handleLogger := log.WithFields(log.Fields{"delete": fmt.Sprintf("/teachers/%v", teacherID)})
-	teaService := models.NewTeacherService()
 
-	exists, err := teaService.TeacherExistsByID(teacherID)
+	exists, err := t.service.TeacherExistsByID(teacherID)
 
 	if err != nil {
 		exceptions.NotFoundException(w, err)
@@ -81,7 +82,7 @@ func (t *TeacherHandler) DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 		handleLogger.Error(err)
 		return
 	}
-	_, err = teaService.DeleteTeacher(teacherID)
+	_, err = t.service.DeleteTeacher(teacherID)
 
 	if err != nil {
 		exceptions.BadRequestException(w, err)
@@ -101,9 +102,8 @@ func (t *TeacherHandler) GetTeacherByID(w http.ResponseWriter, r *http.Request) 
 	}
 
 	handleLogger := log.WithFields(log.Fields{"get": fmt.Sprintf("/teachers/%v", teacherID)})
-	teacherService := models.NewTeacherService()
 
-	exists, err := teacherService.TeacherExistsByID(teacherID)
+	exists, err := t.service.TeacherExistsByID(teacherID)
 
 	if err != nil {
 		exceptions.NotFoundException(w, err)
@@ -117,7 +117,7 @@ func (t *TeacherHandler) GetTeacherByID(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	m, err := teacherService.GetByID(teacherID)
+	m, err := t.service.GetByID(teacherID)
 
 	if err != nil {
 		exceptions.NotFoundException(w, err)
@@ -139,9 +139,7 @@ func (t *TeacherHandler) UpdateTeacher(w http.ResponseWriter, r *http.Request) {
 
 	handleLogger := log.WithFields(log.Fields{"put": fmt.Sprintf("/teachers/%v", teaID)})
 
-	teaService := models.NewTeacherService()
-
-	exists, err := teaService.TeacherExistsByID(teaID)
+	exists, err := t.service.TeacherExistsByID(teaID)
 
 	if err != nil {
 		exceptions.NotFoundException(w, err)
@@ -163,7 +161,7 @@ func (t *TeacherHandler) UpdateTeacher(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tea, err := teaService.UpdateTeacher(teaID, updatedTeacher)
+	tea, err := t.service.UpdateTeacher(teaID, updatedTeacher)
 
 	if err != nil {
 		exceptions.BadRequestException(w, err)
@@ -186,9 +184,8 @@ func (t *TeacherHandler) PostTeacher(w http.ResponseWriter, r *http.Request) {
 		handleLogger.Error(err)
 		return
 	}
-	teaService := models.NewTeacherService()
 
-	tea, err := teaService.NewTeacher(updatedTeacher)
+	tea := t.service.NewTeacher(updatedTeacher)
 
 	if err != nil {
 		exceptions.BadBodyException(w)

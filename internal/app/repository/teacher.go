@@ -4,20 +4,19 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/azka1415/crud-bootcamp-evermos/db"
 )
 
 type TeacherRepository struct {
 	db *sql.DB
 }
 
-func NewTeacherRepository(db *sql.DB) *TeacherRepository {
+func NewTeacherRepository() *TeacherRepository {
 	tr := TeacherRepository{}
-	tr.SetDB(db)
+	db, _ := db.GetDB()
+	tr.db = db
 	return &tr
-}
-
-func (t *TeacherRepository) SetDB(db *sql.DB) {
-	t.db = db
 }
 
 func (t *TeacherRepository) GetAll(field, sort string, limit, offset int) (*sql.Rows, error) {

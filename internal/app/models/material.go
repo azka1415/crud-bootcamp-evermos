@@ -1,11 +1,9 @@
 package models
 
 import (
-	"database/sql"
 	"errors"
 	"time"
 
-	"github.com/azka1415/crud-bootcamp-evermos/db"
 	"github.com/azka1415/crud-bootcamp-evermos/internal/app/repository"
 )
 
@@ -22,27 +20,21 @@ type PayloadMaterial struct {
 	Teacher_id int    `json:"teacher"`
 }
 
-type MaterialService struct{}
+type MaterialService struct {
+	repo *repository.MaterialRepository
+}
 
-func NewMaterialService() *MaterialService {
-	return &MaterialService{}
+func NewMaterialService(repo *repository.MaterialRepository) *MaterialService {
+	ms := MaterialService{}
+	ms.repo = repo
+	return &ms
 }
 
 func (m *MaterialService) GetAll(limit, page int, sort, field string, teacher_id int) ([]Material, error) {
-	db, err := db.GetDB()
-
 	offset := (page - 1) * limit
-
 	var materials []Material
 
-	if err != nil {
-		return nil, err
-	}
-	materialRepository := repository.NewMaterialRepository(db)
-
-	var rows *sql.Rows
-
-	rows, err = materialRepository.GetAll(field, sort, limit, offset, teacher_id)
+	rows, err := m.repo.GetAll(field, sort, limit, offset, teacher_id)
 	if err != nil {
 		return nil, err
 	}
@@ -61,53 +53,28 @@ func (m *MaterialService) GetAll(limit, page int, sort, field string, teacher_id
 }
 
 func (m *MaterialService) GetByID(matID int) (Material, error) {
-	db, err := db.GetDB()
 	var material Material
-	if err != nil {
-		return material, err
-	}
-
-	materialRepository := repository.NewMaterialRepository(db)
-
-	row := materialRepository.GetByID(matID)
+	row := m.repo.GetByID(matID)
 	row.Scan(&material.Id, &material.Title, &material.Teacher_id, &material.CreatedAt, &material.UpdatedAt)
-
 	return material, nil
 }
 
 func (m *MaterialService) UpdateMaterial(matID int, updatedMaterial PayloadMaterial) (Material, error) {
-	db, err := db.GetDB()
-	if err != nil {
-		return Material{}, err
-	}
-
-	matRepo := repository.NewMaterialRepository(db)
 	var material Material
-
-	row := matRepo.UpdateByID(matID, updatedMaterial.Title, updatedMaterial.Teacher_id)
+	row := m.repo.UpdateByID(matID, updatedMaterial.Title, updatedMaterial.Teacher_id)
 	row.Scan(&material.Id, &material.Title, &material.Teacher_id, &material.CreatedAt, &material.UpdatedAt)
-
 	return material, nil
 }
 
-func (m *MaterialService) NewMaterial(newMat PayloadMaterial) (Material, error) {
-	db, err := db.GetDB()
-
-	matRepo := repository.NewMaterialRepository(db)
+func (m *MaterialService) NewMaterial(newMat PayloadMaterial) Material {
 	var mat Material
-	row := matRepo.NewMaterial(newMat.Title, newMat.Teacher_id)
+	row := m.repo.NewMaterial(newMat.Title, newMat.Teacher_id)
 	row.Scan(&mat.Id, &mat.Title, &mat.Teacher_id, &mat.CreatedAt, &mat.UpdatedAt)
-	return mat, err
+	return mat
 }
 
 func (m *MaterialService) DeleteMaterial(matID int) (bool, error) {
-	db, err := db.GetDB()
-	if err != nil {
-		return false, err
-	}
-	matRepo := repository.NewMaterialRepository(db)
-
-	err = matRepo.DeleteMaterial(matID)
+	err := m.repo.DeleteMaterial(matID)
 	if err != nil {
 		return false, err
 	}
@@ -115,13 +82,7 @@ func (m *MaterialService) DeleteMaterial(matID int) (bool, error) {
 }
 
 func (m *MaterialService) MaterialExistsByID(id int) (bool, error) {
-	db, err := db.GetDB()
-	if err != nil {
-		return false, err
-	}
-
-	materialRepo := repository.NewMaterialRepository(db)
-	valid, err := materialRepo.MaterialExistsByID(id)
+	valid, err := m.repo.MaterialExistsByID(id)
 	if err != nil {
 		return valid, errors.New("Material not found")
 	}

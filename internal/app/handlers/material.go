@@ -8,6 +8,7 @@ import (
 
 	"github.com/azka1415/crud-bootcamp-evermos/internal/app/exceptions"
 	"github.com/azka1415/crud-bootcamp-evermos/internal/app/models"
+	"github.com/azka1415/crud-bootcamp-evermos/internal/app/repository"
 	"github.com/azka1415/crud-bootcamp-evermos/internal/app/responses"
 	"github.com/azka1415/crud-bootcamp-evermos/tools/utils"
 	"github.com/azka1415/crud-bootcamp-evermos/tools/utils/enums/sort"
@@ -15,10 +16,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type MaterialHandler struct{}
+type MaterialHandler struct {
+	service *models.MaterialService
+}
 
-func NewMaterialHandler() *MaterialHandler {
-	return &MaterialHandler{}
+func NewMaterialHandler(service *models.MaterialService) *MaterialHandler {
+	mh := MaterialHandler{}
+	mh.service = service
+	return &mh
 }
 
 func (h *MaterialHandler) DeleteMaterial(w http.ResponseWriter, r *http.Request) {
@@ -29,9 +34,8 @@ func (h *MaterialHandler) DeleteMaterial(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	handleLogger := log.WithFields(log.Fields{"delete": fmt.Sprintf("/materials/%v", materialID)})
-	matService := models.NewMaterialService()
 
-	exists, err := matService.MaterialExistsByID(materialID)
+	exists, err := h.service.MaterialExistsByID(materialID)
 
 	if err != nil {
 		exceptions.NotFoundException(w, err)
@@ -44,7 +48,7 @@ func (h *MaterialHandler) DeleteMaterial(w http.ResponseWriter, r *http.Request)
 		handleLogger.Error(err)
 		return
 	}
-	_, err = matService.DeleteMaterial(materialID)
+	_, err = h.service.DeleteMaterial(materialID)
 
 	if err != nil {
 		exceptions.BadRequestException(w, err)
@@ -81,8 +85,7 @@ func (h *MaterialHandler) GetMaterial(w http.ResponseWriter, r *http.Request) {
 
 	var teacher_id int
 	if !filterTeacher {
-		materialService := models.NewMaterialService()
-		m, err := materialService.GetAll(limit, page, sort, field, teacher_id)
+		m, err := h.service.GetAll(limit, page, sort, field, teacher_id)
 		if err != nil {
 			handleLogger.Error(err)
 			exceptions.BadQueryException(w, err)
@@ -100,8 +103,7 @@ func (h *MaterialHandler) GetMaterial(w http.ResponseWriter, r *http.Request) {
 		exceptions.BadQueryException(w, err)
 		return
 	}
-
-	teaService := models.NewTeacherService()
+	teaService := models.NewTeacherService(repository.NewTeacherRepository())
 	exists, err := teaService.TeacherExistsByID(teacher_id)
 
 	if err != nil {
@@ -115,9 +117,8 @@ func (h *MaterialHandler) GetMaterial(w http.ResponseWriter, r *http.Request) {
 		handleLogger.Error(err)
 		return
 	}
-	materialService := models.NewMaterialService()
 
-	m, err := materialService.GetAll(limit, page, sort, field, teacher_id)
+	m, err := h.service.GetAll(limit, page, sort, field, teacher_id)
 
 	if err != nil {
 		handleLogger.Error(err)
@@ -138,9 +139,8 @@ func (h *MaterialHandler) GetMaterialByID(w http.ResponseWriter, r *http.Request
 	}
 
 	handleLogger := log.WithFields(log.Fields{"get": fmt.Sprintf("/materials/%v", materialID)})
-	materialService := models.NewMaterialService()
 
-	exists, err := materialService.MaterialExistsByID(materialID)
+	exists, err := h.service.MaterialExistsByID(materialID)
 
 	if err != nil {
 		exceptions.NotFoundException(w, err)
@@ -154,7 +154,7 @@ func (h *MaterialHandler) GetMaterialByID(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	m, err := materialService.GetByID(materialID)
+	m, err := h.service.GetByID(materialID)
 
 	if err != nil {
 		exceptions.NotFoundException(w, err)
@@ -177,8 +177,7 @@ func (h *MaterialHandler) PostMaterial(w http.ResponseWriter, r *http.Request) {
 		handleLogger.Error(err)
 		return
 	}
-	matService := models.NewMaterialService()
-	teaService := models.NewTeacherService()
+	teaService := models.NewTeacherService(repository.NewTeacherRepository())
 
 	exists, err := teaService.TeacherExistsByID(updatedMaterial.Teacher_id)
 
@@ -194,7 +193,7 @@ func (h *MaterialHandler) PostMaterial(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mat, err := matService.NewMaterial(updatedMaterial)
+	mat := h.service.NewMaterial(updatedMaterial)
 
 	if err != nil {
 		exceptions.BadBodyException(w)
@@ -215,8 +214,7 @@ func (h *MaterialHandler) UpdateMaterial(w http.ResponseWriter, r *http.Request)
 
 	handleLogger := log.WithFields(log.Fields{"put": fmt.Sprintf("/materials/%v", materialID)})
 
-	matService := models.NewMaterialService()
-	exists, err := matService.MaterialExistsByID(materialID)
+	exists, err := h.service.MaterialExistsByID(materialID)
 
 	if err != nil {
 		exceptions.NotFoundException(w, err)
@@ -238,7 +236,7 @@ func (h *MaterialHandler) UpdateMaterial(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	teaService := models.NewTeacherService()
+	teaService := models.NewTeacherService(repository.NewTeacherRepository())
 	exists, err = teaService.TeacherExistsByID(updatedMaterial.Teacher_id)
 
 	if err != nil {
@@ -253,7 +251,7 @@ func (h *MaterialHandler) UpdateMaterial(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	mat, err := matService.UpdateMaterial(materialID, updatedMaterial)
+	mat, err := h.service.UpdateMaterial(materialID, updatedMaterial)
 
 	if err != nil {
 		exceptions.BadRequestException(w, err)

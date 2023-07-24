@@ -4,7 +4,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/azka1415/crud-bootcamp-evermos/db"
 	"github.com/azka1415/crud-bootcamp-evermos/internal/app/repository"
 )
 
@@ -21,23 +20,20 @@ type PayloadTeacher struct {
 	Position string `json:"position"`
 }
 
-type TeacherService struct{}
+type TeacherService struct {
+	repo *repository.TeacherRepository
+}
 
-func NewTeacherService() *TeacherService {
-	return &TeacherService{}
+func NewTeacherService(repo *repository.TeacherRepository) *TeacherService {
+	ts := TeacherService{}
+	ts.repo = repo
+	return &ts
 }
 
 func (t *TeacherService) GetAll(limit, page int, sort, field string) ([]Teacher, error) {
-
-	db, err := db.GetDB()
 	offset := (page - 1) * limit
-	if err != nil {
-		return nil, err
-	}
 	var teachers []Teacher
-
-	teaRepo := repository.NewTeacherRepository(db)
-	rows, err := teaRepo.GetAll(field, sort, limit, offset)
+	rows, err := t.repo.GetAll(field, sort, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -56,53 +52,31 @@ func (t *TeacherService) GetAll(limit, page int, sort, field string) ([]Teacher,
 }
 
 func (t *TeacherService) GetByID(id int) (Teacher, error) {
-	db, err := db.GetDB()
 	var teacher Teacher
-	if err != nil {
-		return teacher, err
-	}
-
-	teaRepo := repository.NewTeacherRepository(db)
-
-	row := teaRepo.GetByID(id)
+	row := t.repo.GetByID(id)
 	row.Scan(&teacher.Id, &teacher.Name, &teacher.Position, &teacher.CreatedAt, &teacher.UpdatedAt)
 
 	return teacher, nil
 }
 
 func (t *TeacherService) UpdateTeacher(id int, updates PayloadTeacher) (Teacher, error) {
-	db, err := db.GetDB()
-	if err != nil {
-		return Teacher{}, err
-	}
-
-	teaRepo := repository.NewTeacherRepository(db)
 	var material Teacher
 
-	row := teaRepo.UpdateByID(id, updates.Name, updates.Position)
+	row := t.repo.UpdateByID(id, updates.Name, updates.Position)
 	row.Scan(&material.Id, &material.Name, &material.Position, &material.CreatedAt, &material.UpdatedAt)
 
 	return material, nil
 }
 
-func (t *TeacherService) NewTeacher(newTea PayloadTeacher) (Teacher, error) {
-	db, err := db.GetDB()
-
-	teaRepo := repository.NewTeacherRepository(db)
+func (t *TeacherService) NewTeacher(newTea PayloadTeacher) Teacher {
 	var tea Teacher
-	row := teaRepo.NewTeacher(newTea.Name, newTea.Position)
+	row := t.repo.NewTeacher(newTea.Name, newTea.Position)
 	row.Scan(&tea.Id, &tea.Name, &tea.Position, &tea.CreatedAt, &tea.UpdatedAt)
-	return tea, err
+	return tea
 }
 
 func (t *TeacherService) DeleteTeacher(id int) (bool, error) {
-	db, err := db.GetDB()
-	if err != nil {
-		return false, err
-	}
-	teaRepo := repository.NewTeacherRepository(db)
-
-	err = teaRepo.DeleteTeacher(id)
+	err := t.repo.DeleteTeacher(id)
 	if err != nil {
 		return false, err
 	}
@@ -110,13 +84,7 @@ func (t *TeacherService) DeleteTeacher(id int) (bool, error) {
 }
 
 func (t *TeacherService) TeacherExistsByID(id int) (bool, error) {
-	db, err := db.GetDB()
-	if err != nil {
-		return false, err
-	}
-
-	teaRepo := repository.NewTeacherRepository(db)
-	valid, err := teaRepo.TeacherExistsByID(id)
+	valid, err := t.repo.TeacherExistsByID(id)
 	if err != nil {
 		return valid, errors.New("Teacher not found")
 	}
