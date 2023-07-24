@@ -76,7 +76,7 @@ func (h *MaterialHandler) GetMaterial(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sort := sort.GetSortDirection(utils.ParseQueryParams(r, "sort"))
-	field := utils.ParseQueryParams(r, "field")
+	field := utils.CheckFieldQuery(utils.ParseQueryParams(r, "field"))
 	filterTeacher := utils.FilterTeacher(utils.ParseQueryParams(r, "teacher_id"))
 
 	var teacher_id int
