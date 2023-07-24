@@ -77,10 +77,10 @@ func (h *MaterialHandler) GetMaterial(w http.ResponseWriter, r *http.Request) {
 
 	sort := sort.GetSortDirection(utils.ParseQueryParams(r, "sort"))
 	field := utils.ParseQueryParams(r, "field")
-	sortTeacher := utils.FilterTeacher(utils.ParseQueryParams(r, "teacher_id"))
+	filterTeacher := utils.FilterTeacher(utils.ParseQueryParams(r, "teacher_id"))
 
 	var teacher_id int
-	if !sortTeacher {
+	if !filterTeacher {
 		materialService := models.NewMaterialService()
 		m, err := materialService.GetAll(limit, page, sort, field, teacher_id)
 		if err != nil {
