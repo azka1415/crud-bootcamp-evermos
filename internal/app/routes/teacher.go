@@ -6,8 +6,8 @@ import (
 )
 
 func SetTeacherRoutes(r chi.Router) {
+	teaHandle := handlers.NewTeacherHandler()
 	r.Route("/teachers", func(r chi.Router) {
-		r.Get("/", handlers.HandleGetTeacher)
-
+		r.Get("/", teaHandle.GetTeacher)
 	})
 }

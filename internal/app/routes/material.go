@@ -6,11 +6,12 @@ import (
 )
 
 func SetMaterialRoutes(r chi.Router) {
+	matHandle := handlers.NewMaterialHandler()
 	r.Route("/materials", func(r chi.Router) {
-		r.Get("/", handlers.HandleGetMaterial)
-		r.Post("/", handlers.HandlePostMaterial)
-		r.Get("/{id}", handlers.HandleGetMaterialByID)
-		r.Put("/{id}", handlers.HandleUpdateMaterial)
-		r.Delete("/{id}", handlers.HandleDeleteMaterial)
+		r.Get("/", matHandle.GetMaterial)
+		r.Post("/", matHandle.PostMaterial)
+		r.Get("/{id}", matHandle.GetMaterialByID)
+		r.Put("/{id}", matHandle.UpdateMaterial)
+		r.Delete("/{id}", matHandle.DeleteMaterial)
 	})
 }

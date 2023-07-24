@@ -12,7 +12,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func HandleGetMaterial(w http.ResponseWriter, r *http.Request) {
+type TeacherHandler struct{}
+
+func NewTeacherHandler() *TeacherHandler {
+	return &TeacherHandler{}
+}
+
+func (t *TeacherHandler) GetTeacher(w http.ResponseWriter, r *http.Request) {
 
 	handleLogger := log.WithFields(log.Fields{"get": "/materials"})
 
@@ -35,9 +41,9 @@ func HandleGetMaterial(w http.ResponseWriter, r *http.Request) {
 	sort := sort.GetSortDirection(utils.ParseQueryParams(r, "sort"))
 	field := utils.ParseQueryParams(r, "field")
 
-	materialService := models.NewMaterialService()
+	teaService := models.NewTeacherService()
 
-	m, err := materialService.GetAll(limit, page, sort, field)
+	m, err := teaService.GetAll(limit, page, sort, field)
 
 	if err != nil {
 		handleLogger.Error(err)
@@ -47,4 +53,8 @@ func HandleGetMaterial(w http.ResponseWriter, r *http.Request) {
 
 	responses.GetAllResponse(w, m, limit, page)
 	handleLogger.Info("Get All Materials Success")
+}
+
+func (t *TeacherHandler) DeleteTeacher(w http.ResponseWriter, r *http.Request) {
+
 }
