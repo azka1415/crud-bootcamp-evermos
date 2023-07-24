@@ -3,8 +3,6 @@ package responses
 import (
 	"encoding/json"
 	"net/http"
-
-	"github.com/azka1415/crud-bootcamp-evermos/internal/app/models"
 )
 
 type Pagination struct {
@@ -17,7 +15,7 @@ type PaginatedResponse struct {
 	Pagination
 }
 
-func GetAllMaterialResponse(w http.ResponseWriter, m []models.Material, limit, page int) {
+func GetAllResponse(w http.ResponseWriter, m interface{}, limit, page int) {
 	w.WriteHeader(http.StatusOK)
 	res := PaginatedResponse{
 		Response{Message: "Success", Data: m}, Pagination{Limit: limit, Page: page},

@@ -43,5 +43,5 @@ func HandleDeleteMaterial(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responses.DeleteMaterialResponse(w)
+	responses.NoContentResponse(w)
 }

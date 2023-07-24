@@ -45,6 +45,6 @@ func HandleGetMaterialByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responses.GetMaterialByIDResponse(w, m)
+	responses.GetByIDResponse(w, m)
 	handleLogger.Info("Get Material By ID success")
 }

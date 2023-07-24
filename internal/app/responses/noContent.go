@@ -4,6 +4,6 @@ import (
 	"net/http"
 )
 
-func DeleteMaterialResponse(w http.ResponseWriter) {
+func NoContentResponse(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNoContent)
 }
