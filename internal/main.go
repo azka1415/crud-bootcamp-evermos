@@ -21,6 +21,7 @@ func API() {
 	r.Use(middleware.CorsMiddleware)
 	r.Use(middleware.JsonMiddleware)
 	routes.SetMaterialRoutes(r)
+	routes.SetTeacherRoutes(r)
 	apiLogger.Info("Connected to database")
 	defer db.Close()
 	apiLogger.Info("Server starting on port 8080")
