@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func NewMaterialResponse(w http.ResponseWriter, m interface{}) {
+func CreatedResponse(w http.ResponseWriter, m interface{}) {
 	w.WriteHeader(http.StatusCreated)
 	res := Response{Message: "Success", Data: m}
 	json.NewEncoder(w).Encode(res)

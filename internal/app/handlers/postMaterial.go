@@ -31,5 +31,5 @@ func HandlePostMaterial(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responses.NewMaterialResponse(w, mat)
+	responses.CreatedResponse(w, mat)
 }
