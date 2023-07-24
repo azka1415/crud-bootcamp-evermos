@@ -18,6 +18,7 @@ func API() {
 	}
 
 	r := chi.NewRouter()
+	r.Use(middleware.CorsMiddleware)
 	r.Use(middleware.JsonMiddleware)
 	routes.SetMaterialRoutes(r)
 	apiLogger.Info("Connected to database")
