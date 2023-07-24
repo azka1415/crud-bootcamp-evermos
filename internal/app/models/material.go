@@ -17,7 +17,7 @@ type Material struct {
 
 type PayloadMaterial struct {
 	Title      string `json:"title"`
-	Teacher_id int    `json:"teacher"`
+	Teacher_id int    `json:"teacher_id"`
 }
 
 type MaterialService struct {
