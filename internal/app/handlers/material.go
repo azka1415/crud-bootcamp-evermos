@@ -77,10 +77,47 @@ func (h *MaterialHandler) GetMaterial(w http.ResponseWriter, r *http.Request) {
 
 	sort := sort.GetSortDirection(utils.ParseQueryParams(r, "sort"))
 	field := utils.ParseQueryParams(r, "field")
+	sortTeacher := utils.FilterTeacher(utils.ParseQueryParams(r, "teacher_id"))
 
+	var teacher_id int
+	if !sortTeacher {
+		materialService := models.NewMaterialService()
+		m, err := materialService.GetAll(limit, page, sort, field, teacher_id)
+		if err != nil {
+			handleLogger.Error(err)
+			exceptions.BadQueryException(w, err)
+			return
+		}
+		responses.GetAllResponse(w, m, limit, page)
+		handleLogger.Info("Get All Materials Success")
+		return
+	}
+
+	teacher_id, err = utils.ConvertToInt(utils.ParseQueryParams(r, "teacher_id"))
+	if err != nil {
+		err = errors.New("invalid teacher_id query param")
+		handleLogger.Error(err)
+		exceptions.BadQueryException(w, err)
+		return
+	}
+
+	teaService := models.NewTeacherService()
+	exists, err := teaService.TeacherExistsByID(teacher_id)
+
+	if err != nil {
+		exceptions.NotFoundException(w, err)
+		handleLogger.Error(err)
+		return
+	}
+
+	if !exists {
+		exceptions.NotFoundException(w, err)
+		handleLogger.Error(err)
+		return
+	}
 	materialService := models.NewMaterialService()
 
-	m, err := materialService.GetAll(limit, page, sort, field)
+	m, err := materialService.GetAll(limit, page, sort, field, teacher_id)
 
 	if err != nil {
 		handleLogger.Error(err)
@@ -141,6 +178,21 @@ func (h *MaterialHandler) PostMaterial(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	matService := models.NewMaterialService()
+	teaService := models.NewTeacherService()
+
+	exists, err := teaService.TeacherExistsByID(updatedMaterial.Teacher_id)
+
+	if err != nil {
+		exceptions.NotFoundException(w, err)
+		handleLogger.Error(err)
+		return
+	}
+
+	if !exists {
+		exceptions.NotFoundException(w, err)
+		handleLogger.Error(err)
+		return
+	}
 
 	mat, err := matService.NewMaterial(updatedMaterial)
 
@@ -164,7 +216,6 @@ func (h *MaterialHandler) UpdateMaterial(w http.ResponseWriter, r *http.Request)
 	handleLogger := log.WithFields(log.Fields{"put": fmt.Sprintf("/materials/%v", materialID)})
 
 	matService := models.NewMaterialService()
-
 	exists, err := matService.MaterialExistsByID(materialID)
 
 	if err != nil {
@@ -183,6 +234,21 @@ func (h *MaterialHandler) UpdateMaterial(w http.ResponseWriter, r *http.Request)
 	err = json.NewDecoder(r.Body).Decode(&updatedMaterial)
 	if err != nil {
 		exceptions.BadBodyException(w)
+		handleLogger.Error(err)
+		return
+	}
+
+	teaService := models.NewTeacherService()
+	exists, err = teaService.TeacherExistsByID(updatedMaterial.Teacher_id)
+
+	if err != nil {
+		exceptions.NotFoundException(w, err)
+		handleLogger.Error(err)
+		return
+	}
+
+	if !exists {
+		exceptions.NotFoundException(w, err)
 		handleLogger.Error(err)
 		return
 	}

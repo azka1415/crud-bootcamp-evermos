@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"errors"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 type Material struct {
 	Id         int       `json:"id"`
 	Title      string    `json:"title"`
-	Teacher_id int       `json:"teacher"`
+	Teacher_id int       `json:"teacher_id"`
 	CreatedAt  time.Time `json:"createdAt"`
 	UpdatedAt  time.Time `json:"updatedAt"`
 }
@@ -27,7 +28,7 @@ func NewMaterialService() *MaterialService {
 	return &MaterialService{}
 }
 
-func (m *MaterialService) GetAll(limit, page int, sort, field string) ([]Material, error) {
+func (m *MaterialService) GetAll(limit, page int, sort, field string, teacher_id int) ([]Material, error) {
 	db, err := db.GetDB()
 
 	offset := (page - 1) * limit
@@ -37,10 +38,11 @@ func (m *MaterialService) GetAll(limit, page int, sort, field string) ([]Materia
 	if err != nil {
 		return nil, err
 	}
-
 	materialRepository := repository.NewMaterialRepository(db)
 
-	rows, err := materialRepository.GetAll(field, sort, limit, offset)
+	var rows *sql.Rows
+
+	rows, err = materialRepository.GetAll(field, sort, limit, offset, teacher_id)
 	if err != nil {
 		return nil, err
 	}

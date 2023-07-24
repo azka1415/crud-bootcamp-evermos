@@ -20,10 +20,17 @@ func (m *MaterialRepository) SetDB(db *sql.DB) {
 	m.db = db
 }
 
-func (m *MaterialRepository) GetAll(field, sort string, limit, offset int) (*sql.Rows, error) {
+func (m *MaterialRepository) GetAll(field, sort string, limit, offset int, teacher_id int) (*sql.Rows, error) {
+	if teacher_id == 0 {
+		query := fmt.Sprintf(
+			"SELECT * FROM materials ORDER BY %s %s LIMIT %d OFFSET %d",
+			field, sort, limit, offset)
+		rows, err := m.db.Query(query)
+		return rows, err
+	}
 	query := fmt.Sprintf(
-		"SELECT * FROM materials ORDER BY %s %s LIMIT %d OFFSET %d",
-		field, sort, limit, offset)
+		"SELECT * FROM materials WHERE teacher_id = %d ORDER BY %s %s LIMIT %d OFFSET %d",
+		teacher_id, field, sort, limit, offset)
 	rows, err := m.db.Query(query)
 	return rows, err
 }
