@@ -24,7 +24,7 @@ func (m *MaterialRepository) GetAll(field, sort string, limit, offset int) (*sql
 	query := fmt.Sprintf(
 		"SELECT * FROM materials ORDER BY %s %s LIMIT %d OFFSET %d",
 		field, sort, limit, offset)
-	rows, err := m.db.Query(query, limit, offset)
+	rows, err := m.db.Query(query)
 	return rows, err
 }
 
@@ -50,7 +50,7 @@ func (m *MaterialRepository) UpdateByID(matID int, title string, teacher int) *s
 
 func (m *MaterialRepository) NewMaterial(title string, teacher_id int) *sql.Row {
 	query := `
-		INSERT INTO materials (title, teacher_id )
+		INSERT INTO materials (title, teacher_id)
 		VALUES (?, ?)
 		RETURNING *;
 	`
