@@ -13,7 +13,7 @@ import (
 func HandlePostMaterial(w http.ResponseWriter, r *http.Request) {
 	handleLogger := log.WithFields(log.Fields{"post": "/materials"})
 
-	var updatedMaterial models.UpdateMaterial
+	var updatedMaterial models.PayloadMaterial
 	err := json.NewDecoder(r.Body).Decode(&updatedMaterial)
 
 	if err != nil {

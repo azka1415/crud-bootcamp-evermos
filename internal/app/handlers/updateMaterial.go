@@ -39,7 +39,7 @@ func HandleUpdateMaterial(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var updatedMaterial models.UpdateMaterial
+	var updatedMaterial models.PayloadMaterial
 	err = json.NewDecoder(r.Body).Decode(&updatedMaterial)
 	if err != nil {
 		exceptions.BadBodyException(w)

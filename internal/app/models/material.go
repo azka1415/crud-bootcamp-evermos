@@ -16,7 +16,7 @@ type Material struct {
 	UpdatedAt  time.Time `json:"updatedAt"`
 }
 
-type UpdateMaterial struct {
+type PayloadMaterial struct {
 	Title      string `json:"title"`
 	Teacher_id int    `json:"teacher"`
 }
@@ -73,7 +73,7 @@ func (m *MaterialService) GetByID(matID int) (Material, error) {
 	return material, nil
 }
 
-func (m *MaterialService) UpdateMaterial(matID int, updatedMaterial UpdateMaterial) (Material, error) {
+func (m *MaterialService) UpdateMaterial(matID int, updatedMaterial PayloadMaterial) (Material, error) {
 	db, err := db.GetDB()
 	if err != nil {
 		return Material{}, err
@@ -88,7 +88,7 @@ func (m *MaterialService) UpdateMaterial(matID int, updatedMaterial UpdateMateri
 	return material, nil
 }
 
-func (m *MaterialService) NewMaterial(newMat UpdateMaterial) (Material, error) {
+func (m *MaterialService) NewMaterial(newMat PayloadMaterial) (Material, error) {
 	db, err := db.GetDB()
 
 	matRepo := repository.NewMaterialRepository(db)
