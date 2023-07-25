@@ -16,17 +16,26 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type MaterialHandler struct {
-	service *models.MaterialService
+type MaterialHandlerImpl struct {
+	service models.MaterialService
 }
 
-func NewMaterialHandler(service *models.MaterialService) *MaterialHandler {
-	mh := MaterialHandler{}
-	mh.service = service
-	return &mh
+type MaterialHandler interface {
+	DeleteMaterial(w http.ResponseWriter, r *http.Request)
+	GetMaterial(w http.ResponseWriter, r *http.Request)
+	GetMaterialByID(w http.ResponseWriter, r *http.Request)
+	PostMaterial(w http.ResponseWriter, r *http.Request)
+	UpdateMaterial(w http.ResponseWriter, r *http.Request)
 }
 
-func (h *MaterialHandler) DeleteMaterial(w http.ResponseWriter, r *http.Request) {
+func NewMaterialHandler(service models.MaterialService) MaterialHandler {
+	mh := MaterialHandlerImpl{service: service}
+	var mathandle MaterialHandler = &mh
+
+	return mathandle
+}
+
+func (h *MaterialHandlerImpl) DeleteMaterial(w http.ResponseWriter, r *http.Request) {
 	materialID, err := utils.ConvertToInt(chi.URLParam(r, "id"))
 	if err != nil {
 		exceptions.BadParamException(w)
@@ -59,7 +68,7 @@ func (h *MaterialHandler) DeleteMaterial(w http.ResponseWriter, r *http.Request)
 	responses.NoContentResponse(w)
 }
 
-func (h *MaterialHandler) GetMaterial(w http.ResponseWriter, r *http.Request) {
+func (h *MaterialHandlerImpl) GetMaterial(w http.ResponseWriter, r *http.Request) {
 
 	handleLogger := log.WithFields(log.Fields{"get": "/materials"})
 
@@ -130,7 +139,7 @@ func (h *MaterialHandler) GetMaterial(w http.ResponseWriter, r *http.Request) {
 	handleLogger.Info("Get All Materials Success")
 }
 
-func (h *MaterialHandler) GetMaterialByID(w http.ResponseWriter, r *http.Request) {
+func (h *MaterialHandlerImpl) GetMaterialByID(w http.ResponseWriter, r *http.Request) {
 	materialID, err := utils.ConvertToInt(chi.URLParam(r, "id"))
 	if err != nil {
 		exceptions.BadParamException(w)
@@ -166,7 +175,7 @@ func (h *MaterialHandler) GetMaterialByID(w http.ResponseWriter, r *http.Request
 	handleLogger.Info("Get Material By ID success")
 }
 
-func (h *MaterialHandler) PostMaterial(w http.ResponseWriter, r *http.Request) {
+func (h *MaterialHandlerImpl) PostMaterial(w http.ResponseWriter, r *http.Request) {
 	handleLogger := log.WithFields(log.Fields{"post": "/materials"})
 
 	var updatedMaterial models.PayloadMaterial
@@ -204,7 +213,7 @@ func (h *MaterialHandler) PostMaterial(w http.ResponseWriter, r *http.Request) {
 	responses.CreatedResponse(w, mat)
 }
 
-func (h *MaterialHandler) UpdateMaterial(w http.ResponseWriter, r *http.Request) {
+func (h *MaterialHandlerImpl) UpdateMaterial(w http.ResponseWriter, r *http.Request) {
 	materialID, err := utils.ConvertToInt(chi.URLParam(r, "id"))
 	if err != nil {
 		exceptions.BadParamException(w)

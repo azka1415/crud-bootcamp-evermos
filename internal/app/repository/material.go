@@ -6,21 +6,26 @@ import (
 	"time"
 )
 
-type MaterialRepository struct {
+type MaterialRepositoryImpl struct {
 	db *sql.DB
 }
 
-func NewMaterialRepository(db *sql.DB) *MaterialRepository {
-	mr := MaterialRepository{}
-	mr.SetDB(db)
-	return &mr
+type MaterialRepository interface {
+	GetAll(field, sort string, limit, offset int, teacher_id int) (*sql.Rows, error)
+	GetByID(id int) *sql.Row
+	UpdateByID(matID int, title string, teacher int, currTime time.Time) *sql.Row
+	NewMaterial(title string, teacher_id int) *sql.Row
+	DeleteMaterial(matID int) error
+	MaterialExistsByID(matID int) (bool, error)
 }
 
-func (m *MaterialRepository) SetDB(db *sql.DB) {
-	m.db = db
+func NewMaterialRepository(db *sql.DB) MaterialRepository {
+	mr := MaterialRepositoryImpl{db: db}
+	var matRep MaterialRepository = &mr
+	return matRep
 }
 
-func (m *MaterialRepository) GetAll(field, sort string, limit, offset int, teacher_id int) (*sql.Rows, error) {
+func (m *MaterialRepositoryImpl) GetAll(field, sort string, limit, offset int, teacher_id int) (*sql.Rows, error) {
 	if teacher_id == 0 {
 		query := fmt.Sprintf(
 			"SELECT * FROM materials ORDER BY %s %s LIMIT %d OFFSET %d",
@@ -35,14 +40,13 @@ func (m *MaterialRepository) GetAll(field, sort string, limit, offset int, teach
 	return rows, err
 }
 
-func (m *MaterialRepository) GetByID(id int) *sql.Row {
+func (m *MaterialRepositoryImpl) GetByID(id int) *sql.Row {
 	query := fmt.Sprintf("SELECT * FROM materials WHERE id = %d", id)
 	row := m.db.QueryRow(query)
 	return row
 }
 
-func (m *MaterialRepository) UpdateByID(matID int, title string, teacher int) *sql.Row {
-	currentTime := time.Now()
+func (m *MaterialRepositoryImpl) UpdateByID(matID int, title string, teacher int, currTime time.Time) *sql.Row {
 	query := `
 		UPDATE materials
 		SET title = ?,
@@ -51,11 +55,11 @@ func (m *MaterialRepository) UpdateByID(matID int, title string, teacher int) *s
 		WHERE id = ?
 		RETURNING *
 	`
-	row := m.db.QueryRow(query, title, currentTime.Local(), teacher, matID)
+	row := m.db.QueryRow(query, title, currTime.UTC(), teacher, matID)
 	return row
 }
 
-func (m *MaterialRepository) NewMaterial(title string, teacher_id int) *sql.Row {
+func (m *MaterialRepositoryImpl) NewMaterial(title string, teacher_id int) *sql.Row {
 	query := `
 		INSERT INTO materials (title, teacher_id)
 		VALUES (?, ?)
@@ -66,12 +70,12 @@ func (m *MaterialRepository) NewMaterial(title string, teacher_id int) *sql.Row 
 	return row
 }
 
-func (m *MaterialRepository) DeleteMaterial(matID int) error {
+func (m *MaterialRepositoryImpl) DeleteMaterial(matID int) error {
 	_, err := m.db.Exec("DELETE FROM materials WHERE id=?", matID)
 	return err
 }
 
-func (m *MaterialRepository) MaterialExistsByID(matID int) (bool, error) {
+func (m *MaterialRepositoryImpl) MaterialExistsByID(matID int) (bool, error) {
 	query := fmt.Sprintf("SELECT id FROM materials WHERE id = %d ", matID)
 	var count int
 	err := m.db.QueryRow(query).Scan(&count)
